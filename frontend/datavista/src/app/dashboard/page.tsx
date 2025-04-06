@@ -6,6 +6,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ScatterChart, Scatter, PieChart, Pie, Cell
 } from 'recharts';
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface AnalysisResult {
   insights: {
@@ -44,6 +46,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const { signOut } = useAuth();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -365,127 +368,137 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Data Analysis Dashboard</h1>
-        
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Upload Data</h2>
-          <div className="flex flex-col md:flex-row gap-4 items-start">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select File (CSV, Excel, or JSON)
-              </label>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls,.json"
-                onChange={handleFileUpload}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-              {file && (
-                <p className="mt-2 text-sm text-gray-600">
-                  Selected: {file.name}
-                </p>
-              )}
-            </div>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Data Analysis Dashboard</h1>
             <button
-              onClick={analyzeData}
-              disabled={!file || loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={signOut}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              {loading ? "Analyzing..." : "Analyze Data"}
+              Sign Out
             </button>
           </div>
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-md">
-              {error}
+          
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-xl font-semibold mb-4">Upload Data</h2>
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select File (CSV, Excel, or JSON)
+                </label>
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls,.json"
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {file && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Selected: {file.name}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={analyzeData}
+                disabled={!file || loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Analyzing..." : "Analyze Data"}
+              </button>
             </div>
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-md">
+                {error}
+              </div>
+            )}
+          </div>
+
+          {analysisResults && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white rounded-lg shadow-md p-6"
+            >
+              <div className="border-b border-gray-200 mb-6">
+                <nav className="-mb-px flex space-x-8">
+                  <button
+                    onClick={() => setActiveTab("overview")}
+                    className={`${
+                      activeTab === "overview"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Overview
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("statistics")}
+                    className={`${
+                      activeTab === "statistics"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Statistics
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("categorical")}
+                    className={`${
+                      activeTab === "categorical"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Categorical
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("visualizations")}
+                    className={`${
+                      activeTab === "visualizations"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Visualizations
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("predictions")}
+                    className={`${
+                      activeTab === "predictions"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Predictions
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("sample")}
+                    className={`${
+                      activeTab === "sample"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Data Sample
+                  </button>
+                </nav>
+              </div>
+              
+              <div className="mt-4">
+                {activeTab === "overview" && renderOverview()}
+                {activeTab === "statistics" && renderStatistics()}
+                {activeTab === "categorical" && renderCategoricalSummary()}
+                {activeTab === "visualizations" && renderVisualizations()}
+                {activeTab === "predictions" && renderPredictions()}
+                {activeTab === "sample" && renderDataSample()}
+              </div>
+            </motion.div>
           )}
         </div>
-
-        {analysisResults && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-white rounded-lg shadow-md p-6"
-          >
-            <div className="border-b border-gray-200 mb-6">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  onClick={() => setActiveTab("overview")}
-                  className={`${
-                    activeTab === "overview"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                >
-                  Overview
-                </button>
-                <button
-                  onClick={() => setActiveTab("statistics")}
-                  className={`${
-                    activeTab === "statistics"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                >
-                  Statistics
-                </button>
-                <button
-                  onClick={() => setActiveTab("categorical")}
-                  className={`${
-                    activeTab === "categorical"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                >
-                  Categorical
-                </button>
-                <button
-                  onClick={() => setActiveTab("visualizations")}
-                  className={`${
-                    activeTab === "visualizations"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                >
-                  Visualizations
-                </button>
-                <button
-                  onClick={() => setActiveTab("predictions")}
-                  className={`${
-                    activeTab === "predictions"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                >
-                  Predictions
-                </button>
-                <button
-                  onClick={() => setActiveTab("sample")}
-                  className={`${
-                    activeTab === "sample"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                >
-                  Data Sample
-                </button>
-              </nav>
-            </div>
-            
-            <div className="mt-4">
-              {activeTab === "overview" && renderOverview()}
-              {activeTab === "statistics" && renderStatistics()}
-              {activeTab === "categorical" && renderCategoricalSummary()}
-              {activeTab === "visualizations" && renderVisualizations()}
-              {activeTab === "predictions" && renderPredictions()}
-              {activeTab === "sample" && renderDataSample()}
-            </div>
-          </motion.div>
-        )}
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
