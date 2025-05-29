@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from 'next/router'; // or useNavigation if using app dir
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { auth } from "../firebaseConfig"; 
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ScatterChart, Scatter, PieChart, Pie, Cell
 } from 'recharts';
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "../../contexts/AuthContext";
-
-
 
 interface AnalysisResult {
   insights: {
@@ -131,11 +131,26 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const [signingOut, setSigningOut] = useState(false);
 
-  const signOut = async () => {
-    await firebaseSignOut(auth);
-    setUser(null);
-    router.push('/login'); // or whatever your login route is
+  // Get user and router from hooks
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Fixed sign out function
+  const handleSignOut = async () => {
+    try {
+      setSigningOut(true);
+      await signOut(auth);
+      // The AuthContext should handle the user state update automatically
+      // and the page.tsx will redirect to login
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      setError('Failed to sign out. Please try again.');
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -418,159 +433,173 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-      <StarField />
-      
-      <div className="relative z-10 p-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="flex justify-between items-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.h1 
-              className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
+        <StarField />
+        
+        <div className="relative z-10 p-6">
+          <div className="max-w-7xl mx-auto">
+            <motion.div 
+              className="flex justify-between items-center mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-               DataVista
-            </motion.h1>
-            <motion.button
-              onClick={signOut}
-              className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl font-semibold hover:from-red-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-purple-900 transition-all duration-300 shadow-lg hover:shadow-xl"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Sign Out
-            </motion.button>
-          </motion.div>
-          
-          <motion.div 
-            className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8 mb-8"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <h2 className="text-2xl font-bold mb-6 text-purple-100 flex items-center">
-              <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
-              Upload Data to the Galaxy
-            </h2>
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-purple-200 mb-3">
-                  Select File (CSV, Excel, or JSON)
-                </label>
-                <motion.input
-                  type="file"
-                  accept=".csv,.xlsx,.xls,.json"
-                  onChange={handleFileUpload}
-                  className="block w-full text-sm text-purple-200 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-purple-100 hover:file:bg-purple-500 file:cursor-pointer cursor-pointer transition-all duration-300"
-                  whileFocus={{ scale: 1.02 }}
-                />
-                {file && (
-                  <motion.p 
-                    className="mt-3 text-sm text-purple-300 bg-purple-800/30 p-3 rounded-lg"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    ✨ Selected: {file.name}
-                  </motion.p>
-                )}
-              </div>
-              <motion.button
-                onClick={analyzeData}
-                disabled={!file || loading}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
-                whileHover={{ scale: !file || loading ? 1 : 1.05 }}
-                whileTap={{ scale: !file || loading ? 1 : 0.95 }}
+              <motion.h1 
+                className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
               >
-                {loading ? (
+                 DataVista
+              </motion.h1>
+              <motion.button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl font-semibold hover:from-red-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-purple-900 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: signingOut ? 1 : 1.05 }}
+                whileTap={{ scale: signingOut ? 1 : 0.95 }}
+              >
+                {signingOut ? (
                   <span className="flex items-center">
                     <motion.div
                       className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     />
-                    Analyzing...
+                    Signing Out...
                   </span>
                 ) : (
-                  "🔬 Analyze Data"
+                  "Sign Out"
                 )}
               </motion.button>
-            </div>
-            {error && (
-              <motion.div 
-                className="mt-6 p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl backdrop-blur-sm"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
+            </motion.div>
+            
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8 mb-8"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <h2 className="text-2xl font-bold mb-6 text-purple-100 flex items-center">
+                <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
+                Upload Data to the Galaxy
+              </h2>
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-purple-200 mb-3">
+                    Select File (CSV, Excel, or JSON)
+                  </label>
+                  <motion.input
+                    type="file"
+                    accept=".csv,.xlsx,.xls,.json"
+                    onChange={handleFileUpload}
+                    className="block w-full text-sm text-purple-200 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-purple-100 hover:file:bg-purple-500 file:cursor-pointer cursor-pointer transition-all duration-300"
+                    whileFocus={{ scale: 1.02 }}
+                  />
+                  {file && (
+                    <motion.p 
+                      className="mt-3 text-sm text-purple-300 bg-purple-800/30 p-3 rounded-lg"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      ✨ Selected: {file.name}
+                    </motion.p>
+                  )}
+                </div>
+                <motion.button
+                  onClick={analyzeData}
+                  disabled={!file || loading}
+                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
+                  whileHover={{ scale: !file || loading ? 1 : 1.05 }}
+                  whileTap={{ scale: !file || loading ? 1 : 0.95 }}
+                >
+                  {loading ? (
+                    <span className="flex items-center">
+                      <motion.div
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                      Analyzing...
+                    </span>
+                  ) : (
+                    "🔬 Analyze Data"
+                  )}
+                </motion.button>
+              </div>
+              {error && (
+                <motion.div 
+                  className="mt-6 p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl backdrop-blur-sm"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  ⚠️ {error}
+                </motion.div>
+              )}
+            </motion.div>
+
+            {analysisResults && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8"
               >
-                ⚠️ {error}
+                <div className="border-b border-purple-500/30 mb-8">
+                  <nav className="-mb-px flex space-x-1 overflow-x-auto">
+                    {[
+                      { id: "overview", label: "Overview", icon: "📊" },
+                      { id: "predictions", label: "Predictions", icon: "🔮" },
+                      { id: "sample", label: "Data Sample", icon: "🗃️" }
+                    ].map((tab) => (
+                      <motion.button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`${
+                          activeTab === tab.id
+                            ? "border-purple-400 text-purple-100 bg-purple-800/30"
+                            : "border-transparent text-purple-300 hover:text-purple-200 hover:border-purple-400/50 hover:bg-purple-800/20"
+                        } whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-all duration-300 rounded-t-lg flex items-center space-x-2`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <span>{tab.icon}</span>
+                        <span>{tab.label}</span>
+                      </motion.button>
+                    ))}
+                  </nav>
+                </div>
+                
+                <div className="mt-6">
+                  {activeTab === "overview" && renderOverview()}
+                  {activeTab === "predictions" && renderPredictions()}
+                  {activeTab === "sample" && renderDataSample()}
+                </div>
               </motion.div>
             )}
-          </motion.div>
-
-          {analysisResults && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8"
-            >
-              <div className="border-b border-purple-500/30 mb-8">
-                <nav className="-mb-px flex space-x-1 overflow-x-auto">
-                  {[
-                    { id: "overview", label: "Overview", icon: "📊" },
-                    { id: "predictions", label: "Predictions", icon: "🔮" },
-                    { id: "sample", label: "Data Sample", icon: "🗃️" }
-                  ].map((tab) => (
-                    <motion.button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`${
-                        activeTab === tab.id
-                          ? "border-purple-400 text-purple-100 bg-purple-800/30"
-                          : "border-transparent text-purple-300 hover:text-purple-200 hover:border-purple-400/50 hover:bg-purple-800/20"
-                      } whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-all duration-300 rounded-t-lg flex items-center space-x-2`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span>{tab.icon}</span>
-                      <span>{tab.label}</span>
-                    </motion.button>
-                  ))}
-                </nav>
-              </div>
-              
-              <div className="mt-6">
-                {activeTab === "overview" && renderOverview()}
-                {activeTab === "predictions" && renderPredictions()}
-                {activeTab === "sample" && renderDataSample()}
-              </div>
-            </motion.div>
-          )}
+          </div>
         </div>
-      </div>
 
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(107, 70, 193, 0.2);
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(168, 85, 247, 0.6);
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(168, 85, 247, 0.8);
-        }
-      `}</style>
-    </div>
+        <style jsx>{`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(107, 70, 193, 0.2);
+            border-radius: 4px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.6);
+            border-radius: 4px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.8);
+          }
+        `}</style>
+      </div>
+    </ProtectedRoute>
   );
 }
