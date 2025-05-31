@@ -168,21 +168,21 @@ export default function Login() {
       {/* Add StarField Background */}
       <StarField />
 
-      <div className="relative z-10 p-10 rounded-2xl shadow-2xl bg-[#1e1b2e]/50 backdrop-blur-md w-[32rem] text-white">
-        <div className="flex justify-center mb-4">
+      <div className="relative z-8 p-8 rounded-2xl shadow-2xl bg-[#1e1b2e]/50 backdrop-blur-md w-[28rem] text-white">
+        <div className="flex justify-center mb-8">
           <img
             src="/bg-7.svg"
             alt="Analysis Icon"
-            className="h-12 w-12 rounded-full object-contain bg-purple-700 p-2"
+            className="h-15 w-15 rounded-full object-contain bg-purple-700 p-2"
           />
         </div>
         <h2 className="text-3xl font-bold text-purple-400 text-center mb-2">Welcome Back</h2>
-        <p className="text-gray-400 text-center mb-6">Login to your Data Analysis Dashboard!</p>
+        <p className="text-gray-400 text-center mb-6">Login to DataVista</p>
 
         {error && <div className="mb-4 p-3 bg-red-800 text-red-100 rounded-lg">{error}</div>}
 
         {/* Email Input with Icon */}
-        <div className="flex items-center mb-4 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
+        <div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
           <svg
             className="h-5 w-5 text-purple-400 ml-3"
             fill="none"
@@ -207,7 +207,7 @@ export default function Login() {
         </div>
 
         {/* Password Input with Icon */}
-        <div className="flex items-center mb-4 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
+        <div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
           <svg
             className="h-5 w-5 text-purple-400 ml-3"
             fill="none"
