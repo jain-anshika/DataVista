@@ -182,54 +182,36 @@ export default function Login() {
         {error && <div className="mb-4 p-3 bg-red-800 text-red-100 rounded-lg">{error}</div>}
 
         {/* Email Input with Icon */}
-        <div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
-          <svg
-            className="h-5 w-5 text-purple-400 ml-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M16 12H8m4 4v-8m-4 4h8M4 6h16v12H4V6z"
-            />
-          </svg>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="w-full p-3 bg-transparent text-white focus:outline-none"
-          />
-        </div>
+<div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
+  <img
+    src="mail.svg"
+    alt="Email Icon"
+    className="h-5 w-5 ml-3"
+  />
+  <input
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    placeholder="Email"
+    className="w-full p-3 bg-transparent text-white focus:outline-none"
+  />
+</div>
 
-        {/* Password Input with Icon */}
-        <div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
-          <svg
-            className="h-5 w-5 text-purple-400 ml-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 11c0-1.1-.9-2-2-2s-2 .9-2 2c0 .7.4 1.3 1 1.7V15h2v-2.3c.6-.4 1-1 1-1.7zm-2-7C6.7 4 4 6.7 4 10v5h2v-5c0-2.2 1.8-4 4-4s4 1.8 4 4v5h2v-5c0-3.3-2.7-6-6-6zm0 14c-1.1 0-2-.9-2-2h-2c0 2.2 1.8 4 4 4s4-1.8 4-4h-2c0 1.1-.9 2-2 2z"
-            />
-          </svg>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full p-3 bg-transparent text-white focus:outline-none"
-          />
-        </div>
+{/* Password Input with Icon */}
+<div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
+  <img
+    src="lock.svg"
+    alt="Password Icon"
+    className="h-5 w-5 ml-3"
+  />
+  <input
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="Password"
+    className="w-full p-3 bg-transparent text-white focus:outline-none"
+  />
+</div>
 
         <button
           onClick={handleEmailLogin}
