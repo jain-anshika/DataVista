@@ -6,12 +6,14 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   onAuthStateChanged,
-  signOut as firebaseSignOut
+  signOut as firebaseSignOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  UserCredential
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../app/firebaseConfig';
 
-// Define a type for user profile data
 interface UserProfileData {
   displayName?: string;
   photoURL?: string;
@@ -24,6 +26,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmailPassword: (email: string, password: string) => Promise<UserCredential>;
   signOut: () => Promise<void>;
   updateUserProfile: (data: UserProfileData) => Promise<void>;
 }
@@ -50,9 +53,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       
-      // If user is logged in, ensure their data is stored in Firestore
       if (user) {
         await storeUserData(user);
+        
+        // Log analytics event only on client side
+        if (typeof window !== 'undefined' && analytics) {
+          const { logEvent } = await import('firebase/analytics');
+          logEvent(analytics, 'login', {
+            method: user.providerData[0]?.providerId
+          });
+        }
       }
       
       setLoading(false);
@@ -61,14 +71,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return unsubscribe;
   }, []);
 
-  // Store user data in Firestore
   const storeUserData = async (user: User) => {
     try {
       const userRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userRef);
       
       if (!userDoc.exists()) {
-        // Create new user document if it doesn't exist
         await setDoc(userRef, {
           uid: user.uid,
           email: user.email,
@@ -78,13 +86,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           lastLogin: serverTimestamp(),
           provider: user.providerData[0]?.providerId || 'unknown'
         });
-        console.log('New user data stored in Firestore');
       } else {
-        // Update last login time for existing users
         await setDoc(userRef, {
           lastLogin: serverTimestamp()
         }, { merge: true });
-        console.log('User login time updated in Firestore');
       }
     } catch (error) {
       console.error('Error storing user data:', error);
@@ -95,9 +100,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // User data will be stored via the onAuthStateChanged listener
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  };
+
+  const signInWithEmailPassword = async (email: string, password: string) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await storeUserData(userCredential.user);
+      return userCredential;
+    } catch (error) {
+      console.error('Error signing in with email/password:', error);
       throw error;
     }
   };
@@ -117,7 +132,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, data, { merge: true });
-      console.log('User profile updated in Firestore');
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;
@@ -128,6 +142,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     loading,
     signInWithGoogle,
+    signInWithEmailPassword,
     signOut,
     updateUserProfile
   };
@@ -137,4 +152,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
       {!loading && children}
     </AuthContext.Provider>
   );
-} 
+}

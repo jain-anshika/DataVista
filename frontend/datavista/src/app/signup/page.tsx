@@ -111,6 +111,8 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { user, signInWithGoogle, updateUserProfile } = useAuth();
   const router = useRouter();
 
@@ -181,6 +183,14 @@ export default function SignupPage() {
       }
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -275,7 +285,7 @@ export default function SignupPage() {
               </svg>
             </div>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
@@ -283,6 +293,13 @@ export default function SignupPage() {
               minLength={6}
               className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
             />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="pr-3 text-gray-400 hover:text-purple-300 transition-colors duration-200"
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
           </div>
 
           {/* Confirm Password */}
@@ -293,7 +310,7 @@ export default function SignupPage() {
               </svg>
             </div>
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm Password"
@@ -301,6 +318,13 @@ export default function SignupPage() {
               minLength={6}
               className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
             />
+            <button
+              type="button"
+              onClick={toggleConfirmPasswordVisibility}
+              className="pr-3 text-gray-400 hover:text-purple-300 transition-colors duration-200"
+            >
+              {showConfirmPassword ? "🙈" : "👁️"}
+            </button>
           </div>
 
           <motion.button

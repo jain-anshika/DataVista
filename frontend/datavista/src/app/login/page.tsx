@@ -20,8 +20,12 @@ const COLORS = ['rgba(147, 51, 234, 0.8)', 'rgba(124, 58, 237, 0.8)', 'rgba(99, 
 
 const StarField = () => {
   const [stars, setStars] = useState<Star[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    if (typeof window === 'undefined') return;
+
     const generateStars = () => {
       const newStars: Star[] = [];
       const starCount = window.innerWidth < 768 ? 50 : 100;
@@ -48,6 +52,8 @@ const StarField = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  if (!isClient) return null;
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
@@ -107,6 +113,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { signInWithGoogle, signInWithEmailPassword, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -129,6 +136,11 @@ export default function Login() {
   };
 
   const handleEmailLogin = async () => {
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -149,6 +161,9 @@ export default function Login() {
         case 'auth/wrong-password':
           setError("Incorrect password. Please try again.");
           break;
+        case 'auth/invalid-email':
+          setError("Invalid email address.");
+          break;
         default:
           setError(error.message);
       }
@@ -167,7 +182,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 p-4 relative overflow-hidden">
-      {/* Added clickable logo in top left corner */}
       <Link href="/" className="absolute top-6 left-6 z-50">
         <motion.div 
           className="flex items-center gap-2"
@@ -238,12 +252,20 @@ export default function Login() {
               </svg>
             </div>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
             />
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              className="px-3 text-gray-400 hover:text-purple-300 transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
           </div>
 
           <motion.button
