@@ -12,7 +12,7 @@ import {
   UserCredential
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../app/firebaseConfig';
+import { auth, db, analyticsPromise } from '../app/firebaseConfig';
 
 interface UserProfileData {
   displayName?: string;
@@ -52,22 +52,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-      
       if (user) {
         await storeUserData(user);
-        
         // Log analytics event only on client side
-        if (typeof window !== 'undefined' && analytics) {
-          const { logEvent } = await import('firebase/analytics');
-          logEvent(analytics, 'login', {
-            method: user.providerData[0]?.providerId
+        if (typeof window !== 'undefined') {
+          analyticsPromise.then(analytics => {
+            if (analytics) {
+              import('firebase/analytics').then(({ logEvent }) => {
+                logEvent(analytics, 'login', {
+                  method: user.providerData[0]?.providerId
+                });
+              });
+            }
           });
         }
       }
-      
       setLoading(false);
     });
-
     return unsubscribe;
   }, []);
 
