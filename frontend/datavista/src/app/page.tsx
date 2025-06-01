@@ -294,115 +294,130 @@ export default function Home() {
         </div>
 
         {/* How It Works Section */}
-        <div className="mb-24">
-          <motion.h2 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 mb-12 text-center"
-          >
-            How It Works
-          </motion.h2>
-          
-          <div className="relative">
-            {/* Timeline */}
-            <div className="absolute left-1/2 h-full w-0.5 bg-gradient-to-b from-purple-500/20 via-indigo-500/50 to-transparent transform -translate-x-1/2"></div>
-            
-            {/* Step 1 */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="mb-12 flex flex-col md:flex-row items-center relative"
-            >
-              <div className="md:w-1/2 md:pr-8 mb-6 md:mb-0">
-                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 mb-4">
-                  <span className="text-white font-bold">1</span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Upload Your Data</h3>
-                <p className="text-gray-300">
-                  Drag and drop your CSV or JSON files directly into our platform or connect to your database.
-                </p>
-              </div>
-              <div className="md:w-1/2">
-                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 shadow-xl">
-                  <div className="relative aspect-video rounded-lg overflow-hidden">
-                    <Image 
-                      src="/upload-demo.svg" 
-                      alt="Upload Demo" 
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-            
-            {/* Step 2 */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="mb-12 flex flex-col md:flex-row-reverse items-center relative"
-            >
-              <div className="md:w-1/2 md:pl-8 mb-6 md:mb-0">
-                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 mb-4">
-                  <span className="text-white font-bold">2</span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">AI-Powered Analysis</h3>
-                <p className="text-gray-300">
-                  Our algorithms automatically detect issues, clean your data, and prepare it for analysis.
-                </p>
-              </div>
-              <div className="md:w-1/2">
-                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 shadow-xl">
-                  <div className="relative aspect-video rounded-lg overflow-hidden">
-                    <Image 
-                      src="/analysis-demo.svg" 
-                      alt="Analysis Demo" 
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-            
-            {/* Step 3 */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="flex flex-col md:flex-row items-center relative"
-            >
-              <div className="md:w-1/2 md:pr-8 mb-6 md:mb-0">
-                <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 mb-4">
-                  <span className="text-white font-bold">3</span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Visualize & Export</h3>
-                <p className="text-gray-300">
-                  Explore insights through interactive visualizations and export your cleaned data with one click.
-                </p>
-              </div>
-              <div className="md:w-1/2">
-                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 shadow-xl">
-                  <div className="relative aspect-video rounded-lg overflow-hidden">
-                    <Image 
-                      src="/visualization-demo.svg" 
-                      alt="Visualization Demo" 
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+<div className="mb-24">
+  <motion.h2 
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
+    transition={{ duration: 0.6 }}
+    viewport={{ once: true }}
+    className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 mb-12 text-center"
+  >
+    How It Works
+  </motion.h2>
+  
+  <div className="relative">
+    {/* Timeline - Hidden on mobile, shown on md and up */}
+    <div className="hidden md:block absolute left-1/2 h-full w-0.5 bg-gradient-to-b from-purple-500/20 via-indigo-500/50 to-transparent transform -translate-x-1/2"></div>
+    
+    {/* Step 1 */}
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+      viewport={{ once: true }}
+      className="mb-12 flex flex-col items-center md:items-start relative"
+    >
+      <div className="flex flex-col md:flex-row w-full items-center">
+        <div className="w-full md:w-1/2 md:pr-8 mb-6 md:mb-0 order-2 md:order-1">
+          <div className="flex items-center mb-4">
+            <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 mr-4">
+              <span className="text-white font-bold">1</span>
+            </div>
+            <h3 className="text-xl font-semibold text-white">Upload Your Data</h3>
+          </div>
+          <p className="text-gray-300 ml-16 md:ml-0">
+            Drag and drop your CSV or JSON files directly into our platform or connect to your database.
+          </p>
+        </div>
+        <div className="w-full md:w-1/2 order-1 md:order-2 mb-4 md:mb-0">
+          <div className="bg-gray-800/50 rounded-xl p-2 md:p-4 border border-gray-700 shadow-xl">
+            <div className="relative aspect-video rounded-lg overflow-hidden">
+              <Image 
+                src="/upload-demo.svg" 
+                alt="Upload Demo" 
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
           </div>
         </div>
+      </div>
+    </motion.div>
+    
+    {/* Step 2 */}
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      viewport={{ once: true }}
+      className="mb-12 flex flex-col items-center md:items-start relative"
+    >
+      <div className="flex flex-col md:flex-row w-full items-center">
+        <div className="w-full md:w-1/2 md:pl-8 mb-6 md:mb-0 order-2">
+          <div className="flex items-center mb-4">
+            <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 mr-4">
+              <span className="text-white font-bold">2</span>
+            </div>
+            <h3 className="text-xl font-semibold text-white">AI-Powered Analysis</h3>
+          </div>
+          <p className="text-gray-300 ml-16 md:ml-0">
+            Our algorithms automatically detect issues, clean your data, and prepare it for analysis.
+          </p>
+        </div>
+        <div className="w-full md:w-1/2 order-1 mb-4 md:mb-0">
+          <div className="bg-gray-800/50 rounded-xl p-2 md:p-4 border border-gray-700 shadow-xl">
+            <div className="relative aspect-video rounded-lg overflow-hidden">
+              <Image 
+                src="/analysis-demo.svg" 
+                alt="Analysis Demo" 
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+    
+    {/* Step 3 */}
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+      viewport={{ once: true }}
+      className="flex flex-col items-center md:items-start relative"
+    >
+      <div className="flex flex-col md:flex-row w-full items-center">
+        <div className="w-full md:w-1/2 md:pr-8 mb-6 md:mb-0 order-2 md:order-1">
+          <div className="flex items-center mb-4">
+            <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 mr-4">
+              <span className="text-white font-bold">3</span>
+            </div>
+            <h3 className="text-xl font-semibold text-white">Visualize & Export</h3>
+          </div>
+          <p className="text-gray-300 ml-16 md:ml-0">
+            Explore insights through interactive visualizations and export your cleaned data with one click.
+          </p>
+        </div>
+        <div className="w-full md:w-1/2 order-1 md:order-2 mb-4 md:mb-0">
+          <div className="bg-gray-800/50 rounded-xl p-2 md:p-4 border border-gray-700 shadow-xl">
+            <div className="relative aspect-video rounded-lg overflow-hidden">
+              <Image 
+                src="/visualization-demo.svg" 
+                alt="Visualization Demo" 
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  </div>
+</div>
 
         {/* Demo Section */}
         <div className="text-center mb-16">
