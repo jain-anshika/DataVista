@@ -8,7 +8,8 @@ const path = require('path');
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-app.use(cors());
+// Allow all origins for CORS
+app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 
 // Create uploads directory if it doesn't exist
