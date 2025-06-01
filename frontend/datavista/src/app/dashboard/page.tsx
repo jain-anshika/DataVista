@@ -12,6 +12,7 @@ import {
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "../../contexts/AuthContext";
 import PredictionTab from "@/components/PredictionTab";
+import { uploadFileApi } from "@/lib/api";
 
 interface AnalysisResult {
   insights: {
@@ -175,19 +176,7 @@ export default function Dashboard() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file); 
-    
-      const response = await fetch("http://localhost:5000/upload", {
-        method: "POST",
-        body: formData,
-      });
-    
-      if (!response.ok) {
-        throw new Error("Failed to analyze data");
-      }
-    
-      const data = await response.json();
+      const data = await uploadFileApi(file);
       setAnalysisResults(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

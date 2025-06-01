@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { uploadFileApi } from '@/lib/api';
 
 export default function UploadFile() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,24 +18,15 @@ export default function UploadFile() {
       setMessage('Please select a file first.');
       return;
     }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await fetch('http://localhost:5000/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setMessage('File uploaded successfully. Insights: ' + JSON.stringify(data));
-      } else {
-        setMessage('Upload failed: ' + data.error);
-      }
+      const data = await uploadFileApi(file);
+      setMessage('File uploaded successfully. Insights: ' + JSON.stringify(data));
     } catch (error) {
-      setMessage('Error uploading file.');
+      if (error instanceof Error) {
+        setMessage('Upload failed: ' + error.message);
+      } else {
+        setMessage('Error uploading file.');
+      }
     }
   };
 
