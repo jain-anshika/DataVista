@@ -1,13 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-
-const COLORS = ['#9333EA', '#7C3AED', '#6366F1', '#8B5CF6', '#A855F7', '#C084FC'];
 
 interface PredictionTabProps {
   data: Record<string, any>[];
@@ -29,7 +27,7 @@ export default function PredictionTab({ data, columns, dataTypes }: PredictionTa
     if (numericalColumns.length > 0 && !selectedColumn) {
       setSelectedColumn(numericalColumns[0]);
     }
-  }, [numericalColumns]);
+  }, [numericalColumns, selectedColumn]);
 
   // Basic statistics calculation
   const calculateBasicStats = (column: string) => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // API utility for backend calls
 export async function uploadFileApi(file: File): Promise<any> {
   const formData = new FormData();

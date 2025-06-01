@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion } from "framer-motion";
@@ -19,28 +20,6 @@ export default function Home() {
     { value: "95%", label: "Accuracy Rate" },
     { value: "24/7", label: "Uptime" },
     { value: "10x", label: "Faster Analysis" },
-  ];
-
-  // Testimonial data
-  const testimonials = [
-    {
-      quote: "This platform revolutionized how we handle our data pipelines. The AI insights saved us hundreds of hours.",
-      author: "Sarah Johnson",
-      role: "Data Scientist at TechCorp",
-      avatar: "/avatar1.svg"
-    },
-    {
-      quote: "The most intuitive data analysis tool I've used. The visualization capabilities are outstanding.",
-      author: "Michael Chen",
-      role: "Analytics Director",
-      avatar: "/avatar2.svg"
-    },
-    {
-      quote: "From messy CSVs to actionable insights in minutes. Our team's productivity has skyrocketed.",
-      author: "Emma Rodriguez",
-      role: "Research Lead",
-      avatar: "/avatar3.svg"
-    }
   ];
 
   return (

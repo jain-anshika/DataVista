@@ -5,12 +5,7 @@ import { motion } from "framer-motion";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../firebaseConfig"; 
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  ScatterChart, Scatter, PieChart, Pie, Cell
-} from 'recharts';
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "../../contexts/AuthContext";
 import PredictionTab from "@/components/PredictionTab";
 import { uploadFileApi } from "@/lib/api";
 
@@ -36,10 +31,6 @@ interface AnalysisResult {
   sample_data?: Record<string, unknown>[];
 }
 
-interface PieChartLabelProps {
-  name: string;
-  percent: number;
-}
 
 interface Star {
   id: number;
@@ -50,7 +41,6 @@ interface Star {
   delay: number;
 }
 
-const COLORS = ['#9333EA', '#7C3AED', '#6366F1', '#8B5CF6', '#A855F7', '#C084FC'];
 
 // Animated Stars Background Component
 const StarField = () => {
@@ -136,7 +126,6 @@ export default function Dashboard() {
   const [signingOut, setSigningOut] = useState(false);
 
   // Get user and router from hooks
-  const { user } = useAuth();
   const router = useRouter();
 
   // Fixed sign out function
@@ -273,7 +262,6 @@ export default function Dashboard() {
         data={analysisResults.sample_data}
         columns={analysisResults.insights.columns}
         dataTypes={analysisResults.insights.data_types}
-        onLoading={setLoading}
       />
     );
   };

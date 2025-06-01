@@ -8,7 +8,6 @@ import {
   onAuthStateChanged,
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   UserCredential
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';

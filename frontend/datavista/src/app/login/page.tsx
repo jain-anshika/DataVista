@@ -6,6 +6,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { FirebaseError } from "firebase/app";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface Star {
   id: number;
@@ -152,7 +153,7 @@ export default function Login() {
     }
   };
 
-  const handleError = (error: any) => {
+  const handleError = (error: unknown) => {
     if (error instanceof FirebaseError) {
       switch (error.code) {
         case 'auth/user-not-found':
@@ -206,10 +207,13 @@ export default function Login() {
            }}>
         <div className="flex justify-center mb-6">
           <div className="h-16 w-16 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 p-2">
-            <img
+            <Image
               src="/bg-7.svg"
               alt="Analysis Icon"
+              width={40}
+              height={40}
               className="h-10 w-10 object-contain"
+              priority
             />
           </div>
         </div>
@@ -319,7 +323,7 @@ export default function Login() {
           </motion.button>
 
           <p className="text-gray-400 mt-4 text-center text-sm sm:text-base">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-purple-300 hover:text-purple-200 hover:underline transition-colors duration-200">
               Sign Up
             </Link>

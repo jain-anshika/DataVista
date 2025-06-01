@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { auth } from '../firebaseConfig';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 
@@ -216,10 +217,13 @@ export default function SignupPage() {
            }}>
         <div className="flex justify-center mb-6">
           <div className="h-16 w-16 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 p-2">
-            <img
+            <Image
               src="/bg-7.svg"
               alt="DataVista Logo"
+              width={40}
+              height={40}
               className="h-10 w-10 object-contain"
+              priority
             />
           </div>
         </div>
