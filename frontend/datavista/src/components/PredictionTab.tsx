@@ -1,67 +1,219 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ScatterChart, Scatter, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
+import { PCA } from 'ml-pca';
+import kmeans from 'ml-kmeans'; 
+import { mean, median, mode, variance } from 'simple-statistics';
+import SimpleLinearRegression from 'ml-regression-simple-linear'; 
 
 const COLORS = ['#9333EA', '#7C3AED', '#6366F1', '#8B5CF6', '#A855F7', '#C084FC'];
 
-export default function PredictionTab() {
+interface PredictionTabProps {
+  data: Record<string, any>[];
+  columns: string[];
+  dataTypes: Record<string, string>;
+  onLoading: (isLoading: boolean) => void;
+}
+
+interface ClusterResult {
+  clusters: Record<string, number>;
+  pcaData: {
+    x: number[];
+    y: number[];
+    cluster: number[];
+    explainedVariance: number[];
+  };
+}
+
+interface RegressionResult {
+  predictions: number[];
+  actual: number[];
+  rSquared: number;
+  coefficients: Record<string, number>;
+}
+
+interface FeatureImportance {
+  feature: string;
+  importance: number;
+}
+
+export default function PredictionTab({ data, columns, dataTypes, onLoading }: PredictionTabProps) {
   const [activePrediction, setActivePrediction] = useState<string>("clustering");
-  const [targetColumn, setTargetColumn] = useState<string>("price");
-  const [features, setFeatures] = useState<string[]>(["rooms", "area"]);
+  const [clusterResult, setClusterResult] = useState<ClusterResult | null>(null);
+  const [regressionResult, setRegressionResult] = useState<RegressionResult | null>(null);
+  const [featureImportance, setFeatureImportance] = useState<FeatureImportance[]>([]);
+  const [targetColumn, setTargetColumn] = useState<string>("");
+  const [features, setFeatures] = useState<string[]>([]);
   const [isTraining, setIsTraining] = useState(false);
 
-  // Hardcoded cluster data
-  const clusterResult = {
-    clusters: {
-      "Cluster 0": 45,
-      "Cluster 1": 30,
-      "Cluster 2": 25
-    },
-    pcaData: {
-      x: Array(100).fill(0).map((_, i) => Math.random() * 10 - 5),
-      y: Array(100).fill(0).map((_, i) => Math.random() * 10 - 5),
-      cluster: Array(100).fill(0).map(() => Math.floor(Math.random() * 3)),
-      explainedVariance: [0.65, 0.25]
+  // Prepare numerical columns for analysis
+  const numericalColumns = columns.filter(col => 
+    dataTypes[col] === 'number' || dataTypes[col] === 'integer'
+  );
+
+  useEffect(() => {
+    if (data.length > 0 && numericalColumns.length > 0) {
+      performClustering();
+      calculateFeatureImportance();
+    }
+  }, [data]);
+
+  const performClustering = async () => {
+    onLoading(true);
+    
+    try {
+      // Prepare data for PCA
+      const numericData = data.map(row => 
+        numericalColumns.map(col => parseFloat(row[col]) || 0 
+),      );
+      
+      // Normalize data
+      const normalizedData = normalizeData(numericData);
+      
+      // Perform PCA
+      const pca = new PCA(normalizedData);
+      const reducedData = pca.predict(normalizedData, { nComponents: 2 });
+      const explainedVariance = pca.getExplainedVariance();
+      
+      // Perform clustering
+      const kmeans = new KMeans(3, { initialization: 'kmeans++' });
+      const clusters = kmeans.cluster(numericData);
+      
+      // Prepare results
+      const result: ClusterResult = {
+        clusters: clusters.clusters.reduce((acc, cluster, idx) => {
+          acc[`Cluster ${cluster}`] = (acc[`Cluster ${cluster}`] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        pcaData: {
+          x: reducedData.getColumn(0),
+          y: reducedData.getColumn(1),
+          cluster: clusters.clusters,
+          explainedVariance: explainedVariance.slice(0, 2)
+        }
+      };
+      
+      setClusterResult(result);
+    } catch (error) {
+      console.error("Clustering error:", error);
+    } finally {
+      onLoading(false);
     }
   };
 
-  // Hardcoded regression data
-  const regressionResult = {
-    predictions: Array(20).fill(0).map((_, i) => 150 + i * 5 + (Math.random() * 20 - 10)),
-    actual: Array(20).fill(0).map((_, i) => 150 + i * 5),
-    rSquared: 0.872,
-    coefficients: {
-      rooms: 25.4,
-      area: 0.78,
-      age: -1.2,
-      location: 15.6
+  const normalizeData = (data: number[][]) => {
+    const normalized = [];
+    const cols = data[0].length;
+    
+    for (let i = 0; i < cols; i++) {
+      const column = data.map(row => row[i]);
+      const min = Math.min(...column);
+      const max = Math.max(...column);
+      const range = max - min;
+      
+      normalized.push(column.map(val => range !== 0 ? (val - min) / range : 0));
     }
+    
+    // Transpose back to original structure
+    return normalized[0].map((_, i) => normalized.map(row => row[i]));
   };
 
-  // Hardcoded feature importance
-  const featureImportance = [
-    { feature: "rooms vs price", importance: 0.85 },
-    { feature: "area vs price", importance: 0.78 },
-    { feature: "age vs price", importance: 0.45 },
-    { feature: "location vs price", importance: 0.62 },
-    { feature: "rooms vs area", importance: 0.55 }
-  ];
+  const calculateFeatureImportance = () => {
+    // Simple correlation-based feature importance
+    const importance: FeatureImportance[] = [];
+    
+    if (numericalColumns.length < 2) return;
+    
+    for (let i = 0; i < numericalColumns.length; i++) {
+      for (let j = i + 1; j < numericalColumns.length; j++) {
+        const col1 = numericalColumns[i];
+        const col2 = numericalColumns[j];
+        
+        const values1 = data.map(row => parseFloat(row[col1]) || 0);
+        const values2 = data.map(row => parseFloat(row[col2]) || 0);
+        
+        const correlation = pearsonCorrelation(values1, values2);
+        importance.push({ feature: `${col1} vs ${col2}`, importance: Math.abs(correlation) });
+      }
+    }
+    
+    // Sort by importance
+    importance.sort((a, b) => b.importance - a.importance);
+    setFeatureImportance(importance.slice(0, 10));
+  };
 
-  const numericalColumns = ["price", "rooms", "area", "age", "location"];
+  const pearsonCorrelation = (x: number[], y: number[]) => {
+    const n = x.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+    
+    for (let i = 0; i < n; i++) {
+      sumX += x[i];
+      sumY += y[i];
+      sumXY += x[i] * y[i];
+      sumX2 += x[i] * x[i];
+      sumY2 += y[i] * y[i];
+    }
+    
+    const numerator = sumXY - (sumX * sumY / n);
+    const denominator = Math.sqrt((sumX2 - (sumX * sumX / n)) * (sumY2 - (sumY * sumY / n)));
+    
+    return denominator !== 0 ? numerator / denominator : 0;
+  };
 
-  const trainRegressionModel = () => {
+  const trainRegressionModel = async () => {
+    if (!targetColumn || features.length === 0) return;
+    
+    onLoading(true);
     setIsTraining(true);
-    setTimeout(() => {
+    
+    try {
+      // Prepare data
+      const xValues = data.map(row => 
+        features.map(feature => parseFloat(row[feature]) || 0
+      ),      );
+      const yValues = data.map(row => parseFloat(row[targetColumn]) || 0);
+      
+      // Train linear regression model
+      const regression = new LinearRegression(xValues, yValues);
+      
+      // Make predictions
+      const predictions = xValues.map(x => regression.predict(x));
+      
+      // Calculate R-squared
+      const yMean = mean(yValues);
+      const ssTotal = yValues.reduce((acc, val) => acc + Math.pow(val - yMean, 2), 0);
+      const ssResidual = yValues.reduce((acc, val, idx) => acc + Math.pow(val - predictions[idx], 2), 0);
+      const rSquared = 1 - (ssResidual / ssTotal);
+      
+      // Get coefficients
+      const coefficients: Record<string, number> = {};
+      features.forEach((feature, index) => {
+        coefficients[feature] = regression.weights[index + 1]; // +1 because index 0 is the intercept
+      });
+      
+      setRegressionResult({
+        predictions,
+        actual: yValues,
+        rSquared,
+        coefficients
+      });
+      
+    } catch (error) {
+      console.error("Training error:", error);
+    } finally {
+      onLoading(false);
       setIsTraining(false);
-    }, 1500);
+    }
   };
 
   const renderClusteringResults = () => {
+    if (!clusterResult) return null;
+    
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div 
@@ -154,12 +306,15 @@ export default function PredictionTab() {
   };
 
   const renderRegressionResults = () => {
+    if (!regressionResult) return null;
+    
     const chartData = regressionResult.actual.map((actual, idx) => ({
       actual,
       predicted: regressionResult.predictions[idx],
       index: idx
     }));
     
+    // Prepare coefficients data for display
     const coefficientsData = Object.entries(regressionResult.coefficients).map(([feature, value]) => ({
       feature,
       value
@@ -278,7 +433,7 @@ export default function PredictionTab() {
                       <div className="w-full bg-purple-900/50 rounded-full h-2.5">
                         <div 
                           className="bg-purple-500 h-2.5 rounded-full" 
-                          style={{ width: `${Math.abs(row.value) * 20}%` }}
+                          style={{ width: `${Math.abs(row.value) * 100}%` }}
                         ></div>
                       </div>
                     </td>
@@ -379,7 +534,7 @@ export default function PredictionTab() {
     <div className="space-y-6">
       <h3 className="text-2xl font-bold text-purple-100 flex items-center">
         <span className="w-3 h-3 bg-cyan-400 rounded-full mr-3 animate-pulse"></span>
-        Advanced Analytics (Demo Data)
+        Advanced Analytics
       </h3>
       
       <div className="border-b border-purple-500/30 mb-6">
