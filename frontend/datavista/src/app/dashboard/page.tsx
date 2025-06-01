@@ -154,6 +154,10 @@ export default function Dashboard() {
     }
   };
 
+  const handleHomeRedirect = () => {
+    router.push('/');
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -267,23 +271,23 @@ export default function Dashboard() {
   };
 
   const renderPredictions = () => {
-  if (!analysisResults || !analysisResults.sample_data || analysisResults.sample_data.length === 0) {
-    return (
-      <div className="text-center py-10 text-purple-300">
-        No data available for predictions. Please analyze a dataset first.
-      </div>
-    );
-  }
+    if (!analysisResults || !analysisResults.sample_data || analysisResults.sample_data.length === 0) {
+      return (
+        <div className="text-center py-10 text-purple-300">
+          No data available for predictions. Please analyze a dataset first.
+        </div>
+      );
+    }
 
-  return (
-    <PredictionTab 
-      data={analysisResults.sample_data}
-      columns={analysisResults.insights.columns}
-      dataTypes={analysisResults.insights.data_types}
-      onLoading={setLoading}
-    />
-  );
-};
+    return (
+      <PredictionTab 
+        data={analysisResults.sample_data}
+        columns={analysisResults.insights.columns}
+        dataTypes={analysisResults.insights.data_types}
+        onLoading={setLoading}
+      />
+    );
+  };
 
   const renderDataSample = () => {
     if (!analysisResults || !analysisResults.sample_data || analysisResults.sample_data.length === 0) return null;
@@ -351,11 +355,12 @@ export default function Dashboard() {
               transition={{ duration: 0.8 }}
             >
               <motion.h1 
-                className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
+                className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
+                onClick={handleHomeRedirect}
               >
-                 DataVista
+                DataVista
               </motion.h1>
               <motion.button
                 onClick={handleSignOut}
@@ -380,94 +385,94 @@ export default function Dashboard() {
             </motion.div>
             
             <motion.div 
-  className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8 mb-8"
-  initial={{ opacity: 0, scale: 0.95 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ duration: 0.8, delay: 0.2 }}
->
-  <h2 className="text-2xl font-bold mb-6 text-purple-100 flex items-center">
-    <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
-    Upload Data to the Galaxy
-  </h2>
-  
-  <div 
-    className="border-2 border-dashed border-purple-500/30 rounded-xl p-8 text-center cursor-pointer mb-6"
-    onDrop={(e) => {
-      e.preventDefault();
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        setFile(e.dataTransfer.files[0]);
-        setError(null);
-      }
-    }}
-    onDragOver={(e) => e.preventDefault()}
-    onClick={() => document.getElementById('file-upload')?.click()}
-  >
-    <div className="space-y-4">
-      <p className="text-lg text-purple-200">Upload Your Data</p>
-      <p className="text-gray-400">
-        Drag and drop your CSV, Excel, or JSON file here, or click to browse
-      </p>
-      <input
-        type="file"
-        id="file-upload"
-        className="hidden"
-        accept=".csv,.xlsx,.xls,.json"
-        onChange={handleFileUpload}
-      />
-      <motion.button
-        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        Choose File
-      </motion.button>
-      {file && (
-        <motion.p 
-          className="text-purple-300 mt-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          Selected: {file.name}
-        </motion.p>
-      )}
-    </div>
-  </div>
+              className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8 mb-8"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <h2 className="text-2xl font-bold mb-6 text-purple-100 flex items-center">
+                <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
+                Upload Data to the Galaxy
+              </h2>
+              
+              <div 
+                className="border-2 border-dashed border-purple-500/30 rounded-xl p-8 text-center cursor-pointer mb-6"
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    setFile(e.dataTransfer.files[0]);
+                    setError(null);
+                  }
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => document.getElementById('file-upload')?.click()}
+              >
+                <div className="space-y-4">
+                  <p className="text-lg text-purple-200">Upload Your Data</p>
+                  <p className="text-gray-400">
+                    Drag and drop your CSV, Excel, or JSON file here, or click to browse
+                  </p>
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept=".csv,.xlsx,.xls,.json"
+                    onChange={handleFileUpload}
+                  />
+                  <motion.button
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Choose File
+                  </motion.button>
+                  {file && (
+                    <motion.p 
+                      className="text-purple-300 mt-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      Selected: {file.name}
+                    </motion.p>
+                  )}
+                </div>
+              </div>
 
-  <div className="flex justify-center">
-    <motion.button
-      onClick={analyzeData}
-      disabled={!file || loading}
-      className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
-      whileHover={{ scale: !file || loading ? 1 : 1.05 }}
-      whileTap={{ scale: !file || loading ? 1 : 0.95 }}
-    >
-      {loading ? (
-        <span className="flex items-center">
-          <motion.div
-            className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          Analyzing...
-        </span>
-      ) : (
-        "🔬 Analyze Data"
-      )}
-    </motion.button>
-  </div>
-  
-  {error && (
-    <motion.div 
-      className="mt-6 p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl backdrop-blur-sm"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      ⚠️ {error}
-    </motion.div>
-  )}
-</motion.div>
+              <div className="flex justify-center">
+                <motion.button
+                  onClick={analyzeData}
+                  disabled={!file || loading}
+                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
+                  whileHover={{ scale: !file || loading ? 1 : 1.05 }}
+                  whileTap={{ scale: !file || loading ? 1 : 0.95 }}
+                >
+                  {loading ? (
+                    <span className="flex items-center">
+                      <motion.div
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                      Analyzing...
+                    </span>
+                  ) : (
+                    "🔬 Analyze Data"
+                  )}
+                </motion.button>
+              </div>
+              
+              {error && (
+                <motion.div 
+                  className="mt-6 p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl backdrop-blur-sm"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  ⚠️ {error}
+                </motion.div>
+              )}
+            </motion.div>
 
             {analysisResults && (
               <motion.div
@@ -510,6 +515,16 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        <footer className="relative z-10 w-full py-4 text-center text-gray-400 text-sm">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            © 2025 DataVista by Anshika Jain. All rights reserved.
+          </motion.p>
+        </footer>
 
         <style jsx>{`
           .custom-scrollbar::-webkit-scrollbar {

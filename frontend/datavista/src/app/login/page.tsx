@@ -7,7 +7,6 @@ import { FirebaseError } from "firebase/app";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-// Define the Star interface
 interface Star {
   id: number;
   x: number;
@@ -17,16 +16,17 @@ interface Star {
   delay: number;
 }
 
-const COLORS = ['#9333EA', '#7C3AED', '#6366F1', '#8B5CF6', '#A855F7', '#C084FC'];
+const COLORS = ['rgba(147, 51, 234, 0.8)', 'rgba(124, 58, 237, 0.8)', 'rgba(99, 102, 241, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(168, 85, 247, 0.8)', 'rgba(192, 132, 252, 0.8)'];
 
-// Animated Stars Background Component
 const StarField = () => {
-  const [starsINN, setStars] = useState<Star[]>([]);
+  const [stars, setStars] = useState<Star[]>([]);
 
   useEffect(() => {
     const generateStars = () => {
       const newStars: Star[] = [];
-      for (let i = 0; i < 100; i++) {
+      const starCount = window.innerWidth < 768 ? 50 : 100;
+      
+      for (let i = 0; i < starCount; i++) {
         newStars.push({
           id: i,
           x: Math.random() * 100,
@@ -40,14 +40,21 @@ const StarField = () => {
     };
 
     generateStars();
+    
+    const handleResize = () => {
+      generateStars();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {starsINN.map((star) => (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+      {stars.map((star) => (
         <motion.div
           key={star.id}
-          className="absolute rounded-full opacity-80"
+          className="absolute rounded-full"
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
@@ -69,8 +76,7 @@ const StarField = () => {
         />
       ))}
       
-      {/* Shooting stars */}
-      {[...Array(3)].map((_, i) => (
+      {[...Array(window.innerWidth < 768 ? 2 : 3)].map((_, i) => (
         <motion.div
           key={`shooting-${i}`}
           className="absolute w-1 h-1 rounded-full"
@@ -96,7 +102,6 @@ const StarField = () => {
   );
 };
 
-// Main Login Component
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -154,95 +159,161 @@ export default function Login() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-purple-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
-      {/* Existing Galaxy Background */}
-      <div className="absolute inset-0 z-0 bg-[url('/galaxy.gif')] bg-cover bg-center opacity-30 animate-float-stars"></div>
-      
-      {/* Add StarField Background */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 p-4 relative overflow-hidden">
+      {/* Added clickable logo in top left corner */}
+      <Link href="/" className="absolute top-6 left-6 z-50">
+        <motion.div 
+          className="flex items-center gap-2"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className="text-2xl">🔍</span>
+          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-indigo-200">
+            DataVista
+          </h1>
+        </motion.div>
+      </Link>
+
+      <div className="absolute inset-0 bg-[url('/galaxy.gif')] bg-cover bg-center opacity-20"></div>
       <StarField />
 
-      <div className="relative z-8 p-8 rounded-2xl shadow-2xl bg-[#1e1b2e]/50 backdrop-blur-md w-[28rem] text-white">
-        <div className="flex justify-center mb-8">
-          <img
-            src="/bg-7.svg"
-            alt="Analysis Icon"
-            className="h-15 w-15 rounded-full object-contain bg-purple-700 p-2"
-          />
+      <div className="relative z-10 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md backdrop-blur-lg mb-8"
+           style={{
+             background: 'radial-gradient(circle at center, rgba(30, 27, 46, 0.7) 0%, rgba(46, 16, 101, 0.7) 100%)',
+             border: '1px solid rgba(139, 92, 246, 0.3)',
+             boxShadow: '0 8px 32px 0 rgba(103, 58, 183, 0.37)'
+           }}>
+        <div className="flex justify-center mb-6">
+          <div className="h-16 w-16 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 p-2">
+            <img
+              src="/bg-7.svg"
+              alt="Analysis Icon"
+              className="h-10 w-10 object-contain"
+            />
+          </div>
         </div>
-        <h2 className="text-3xl font-bold text-purple-400 text-center mb-2">Welcome Back</h2>
-        <p className="text-gray-400 text-center mb-6">Login to DataVista</p>
+        
+        <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 text-center mb-2">
+          Welcome Back
+        </h2>
+        <p className="text-gray-300 text-center mb-6">Login to DataVista</p>
 
-        {error && <div className="mb-4 p-3 bg-red-800 text-red-100 rounded-lg">{error}</div>}
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-3 rounded-lg bg-gradient-to-r from-red-900/80 to-pink-900/80 text-red-100"
+          >
+            {error}
+          </motion.div>
+        )}
 
-        {/* Email Input with Icon */}
-<div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
-  <img
-    src="mail.svg"
-    alt="Email Icon"
-    className="h-5 w-5 ml-3"
-  />
-  <input
-    type="email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    placeholder="Email"
-    className="w-full p-3 bg-transparent text-white focus:outline-none"
-  />
-</div>
+        <div className="space-y-4">
+          <div className="flex items-center bg-gray-800/50 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
+            <div className="pl-3 pr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
+            />
+          </div>
 
-{/* Password Input with Icon */}
-<div className="flex items-center mb-6 bg-gray-800 rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-purple-500">
-  <img
-    src="lock.svg"
-    alt="Password Icon"
-    className="h-5 w-5 ml-3"
-  />
-  <input
-    type="password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    placeholder="Password"
-    className="w-full p-3 bg-transparent text-white focus:outline-none"
-  />
-</div>
+          <div className="flex items-center bg-gray-800/50 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
+            <div className="pl-3 pr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
+            />
+          </div>
 
-        <button
-          onClick={handleEmailLogin}
-          disabled={loading}
-          className="w-full bg-purple-700 hover:bg-purple-600 p-3 rounded-lg font-semibold shadow-md mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Signing in..." : "Login"}
-        </button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleEmailLogin}
+            disabled={loading}
+            className="w-full p-3 rounded-lg font-semibold shadow-md mb-4 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            style={{
+              background: 'linear-gradient(45deg, rgba(124, 58, 237, 0.9) 0%, rgba(99, 102, 241, 0.9) 100%)',
+              boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)'
+            }}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </span>
+            ) : (
+              "Login"
+            )}
+          </motion.button>
 
-        <div className="flex items-center justify-center mb-4">
-          <span className="text-gray-500">or</span>
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex-1 h-px bg-gray-700"></div>
+            <span className="px-3 text-gray-400 text-sm">or</span>
+            <div className="flex-1 h-px bg-gray-700"></div>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full p-3 rounded-lg font-medium shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            style={{
+              background: 'rgba(55, 65, 81, 0.7)',
+              border: '1px solid rgba(75, 85, 99, 0.5)'
+            }}
+          >
+            <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+              <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+              <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+              <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+              <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+            </svg>
+            {loading ? "Signing in..." : "Continue with Google"}
+          </motion.button>
+
+          <p className="text-gray-400 mt-4 text-center text-sm sm:text-base">
+            Don't have an account?{' '}
+            <Link href="/signup" className="text-purple-300 hover:text-purple-200 hover:underline transition-colors duration-200">
+              Sign Up
+            </Link>
+          </p>
         </div>
-
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded-lg text-lg font-semibold shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
-            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
-            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
-            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
-            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
-          </svg>
-          {loading ? "Signing in..." : "Continue with Google"}
-        </button>
-
-        <p className="text-gray-400 mt-4 text-center">
-          Don't have an account? <Link href="/signup" className="text-purple-400 hover:underline">Sign Up</Link>
-        </p>
       </div>
+
+      <footer className="relative z-10 w-full py-4 text-center text-gray-400 text-sm">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          © 2025 DataVista by Anshika Jain. All rights reserved.
+        </motion.p>
+      </footer>
     </div>
   );
 }
