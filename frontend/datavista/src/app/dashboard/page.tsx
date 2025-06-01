@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "../../contexts/AuthContext";
+import PredictionTab from "@/components/PredictionTab";
 
 interface AnalysisResult {
   insights: {
@@ -266,119 +267,23 @@ export default function Dashboard() {
   };
 
   const renderPredictions = () => {
-    if (!analysisResults || !analysisResults.predictions) return null;
-    
+  if (!analysisResults || !analysisResults.sample_data || analysisResults.sample_data.length === 0) {
     return (
-      <motion.div 
-        className="space-y-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h3 className="text-2xl font-bold text-purple-100 flex items-center">
-          <span className="w-3 h-3 bg-cyan-400 rounded-full mr-3 animate-pulse"></span>
-          Predictions & Insights
-        </h3>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {analysisResults.predictions.segment_distribution && (
-            <motion.div 
-              className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border border-purple-500/30 p-6 rounded-xl shadow-2xl"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h4 className="text-xl font-bold mb-4 text-purple-100">Data Segments</h4>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={Object.entries(analysisResults.predictions.segment_distribution).map(([name, value]) => ({ name, value }))}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }: PieChartLabelProps) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {Object.entries(analysisResults.predictions.segment_distribution).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: '#581C87',
-                        border: '1px solid #7C3AED',
-                        borderRadius: '8px',
-                        color: '#E9D5FF'
-                      }}
-                    />
-                    <Legend wrapperStyle={{ color: '#C4B5FD' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          )}
-          
-          {analysisResults.predictions.pca_data && (
-            <motion.div 
-              className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border border-purple-500/30 p-6 rounded-xl shadow-2xl"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h4 className="text-xl font-bold mb-2 text-purple-100">PCA Visualization</h4>
-              <p className="text-sm text-purple-300 mb-4">
-                Explained variance: {analysisResults.predictions.pca_data.explained_variance.map((v, i) => 
-                  `PC${i+1}: ${(v * 100).toFixed(1)}%`
-                ).join(', ')}
-              </p>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#7C3AED40" />
-                    <XAxis 
-                      dataKey="x" 
-                      name="PC1" 
-                      tick={{ fill: '#C4B5FD', fontSize: 12 }}
-                    />
-                    <YAxis 
-                      dataKey="y" 
-                      name="PC2" 
-                      tick={{ fill: '#C4B5FD', fontSize: 12 }}
-                    />
-                    <Tooltip 
-                      cursor={{ strokeDasharray: '3 3' }}
-                      contentStyle={{
-                        backgroundColor: '#581C87',
-                        border: '1px solid #7C3AED',
-                        borderRadius: '8px',
-                        color: '#E9D5FF'
-                      }}
-                    />
-                    <Legend wrapperStyle={{ color: '#C4B5FD' }} />
-                    <Scatter 
-                      name="Data Points" 
-                      data={analysisResults.predictions.pca_data.x.map((x, i) => {
-                        const pcaData = analysisResults.predictions?.pca_data;
-                        if (!pcaData) return { x, y: 0, segment: 'Unknown' };
-                        
-                        return {
-                          x,
-                          y: pcaData.y[i],
-                          segment: pcaData.segment?.[i] || 'Unknown'
-                        };
-                      })}
-                      fill="#A855F7"
-                    />
-                  </ScatterChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
+      <div className="text-center py-10 text-purple-300">
+        No data available for predictions. Please analyze a dataset first.
+      </div>
     );
-  };
+  }
+
+  return (
+    <PredictionTab 
+      data={analysisResults.sample_data}
+      columns={analysisResults.insights.columns}
+      dataTypes={analysisResults.insights.data_types}
+      onLoading={setLoading}
+    />
+  );
+};
 
   const renderDataSample = () => {
     if (!analysisResults || !analysisResults.sample_data || analysisResults.sample_data.length === 0) return null;
@@ -475,70 +380,94 @@ export default function Dashboard() {
             </motion.div>
             
             <motion.div 
-              className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8 mb-8"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <h2 className="text-2xl font-bold mb-6 text-purple-100 flex items-center">
-                <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
-                Upload Data to the Galaxy
-              </h2>
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-purple-200 mb-3">
-                    Select File (CSV, Excel, or JSON)
-                  </label>
-                  <motion.input
-                    type="file"
-                    accept=".csv,.xlsx,.xls,.json"
-                    onChange={handleFileUpload}
-                    className="block w-full text-sm text-purple-200 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-purple-100 hover:file:bg-purple-500 file:cursor-pointer cursor-pointer transition-all duration-300"
-                    whileFocus={{ scale: 1.02 }}
-                  />
-                  {file && (
-                    <motion.p 
-                      className="mt-3 text-sm text-purple-300 bg-purple-800/30 p-3 rounded-lg"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      ✨ Selected: {file.name}
-                    </motion.p>
-                  )}
-                </div>
-                <motion.button
-                  onClick={analyzeData}
-                  disabled={!file || loading}
-                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
-                  whileHover={{ scale: !file || loading ? 1 : 1.05 }}
-                  whileTap={{ scale: !file || loading ? 1 : 0.95 }}
-                >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <motion.div
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      />
-                      Analyzing...
-                    </span>
-                  ) : (
-                    "🔬 Analyze Data"
-                  )}
-                </motion.button>
-              </div>
-              {error && (
-                <motion.div 
-                  className="mt-6 p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl backdrop-blur-sm"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  ⚠️ {error}
-                </motion.div>
-              )}
-            </motion.div>
+  className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 backdrop-blur-lg border border-purple-500/30 rounded-2xl shadow-2xl p-8 mb-8"
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.8, delay: 0.2 }}
+>
+  <h2 className="text-2xl font-bold mb-6 text-purple-100 flex items-center">
+    <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse"></span>
+    Upload Data to the Galaxy
+  </h2>
+  
+  <div 
+    className="border-2 border-dashed border-purple-500/30 rounded-xl p-8 text-center cursor-pointer mb-6"
+    onDrop={(e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        setFile(e.dataTransfer.files[0]);
+        setError(null);
+      }
+    }}
+    onDragOver={(e) => e.preventDefault()}
+    onClick={() => document.getElementById('file-upload')?.click()}
+  >
+    <div className="space-y-4">
+      <p className="text-lg text-purple-200">Upload Your Data</p>
+      <p className="text-gray-400">
+        Drag and drop your CSV, Excel, or JSON file here, or click to browse
+      </p>
+      <input
+        type="file"
+        id="file-upload"
+        className="hidden"
+        accept=".csv,.xlsx,.xls,.json"
+        onChange={handleFileUpload}
+      />
+      <motion.button
+        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        Choose File
+      </motion.button>
+      {file && (
+        <motion.p 
+          className="text-purple-300 mt-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          Selected: {file.name}
+        </motion.p>
+      )}
+    </div>
+  </div>
+
+  <div className="flex justify-center">
+    <motion.button
+      onClick={analyzeData}
+      disabled={!file || loading}
+      className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
+      whileHover={{ scale: !file || loading ? 1 : 1.05 }}
+      whileTap={{ scale: !file || loading ? 1 : 0.95 }}
+    >
+      {loading ? (
+        <span className="flex items-center">
+          <motion.div
+            className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          Analyzing...
+        </span>
+      ) : (
+        "🔬 Analyze Data"
+      )}
+    </motion.button>
+  </div>
+  
+  {error && (
+    <motion.div 
+      className="mt-6 p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-xl backdrop-blur-sm"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      ⚠️ {error}
+    </motion.div>
+  )}
+</motion.div>
 
             {analysisResults && (
               <motion.div
