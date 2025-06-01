@@ -18,10 +18,16 @@ interface Star {
   delay: number;
 }
 
+const COLORS = ['rgba(147, 51, 234, 0.8)', 'rgba(124, 58, 237, 0.8)', 'rgba(99, 102, 241, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(168, 85, 247, 0.8)', 'rgba(192, 132, 252, 0.8)'];
+
 const StarField = () => {
   const [stars, setStars] = useState<Star[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    if (typeof window === 'undefined') return;
+
     const generateStars = () => {
       const newStars: Star[] = [];
       const starCount = window.innerWidth < 768 ? 50 : 100;
@@ -49,7 +55,7 @@ const StarField = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const COLORS = ['rgba(147, 51, 234, 0.8)', 'rgba(124, 58, 237, 0.8)', 'rgba(99, 102, 241, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(168, 85, 247, 0.8)', 'rgba(192, 132, 252, 0.8)'];
+  if (!isClient) return null;
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
@@ -185,35 +191,25 @@ export default function SignupPage() {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 p-4 relative overflow-hidden">
-      {/* Added clickable logo in top left corner */}
-      <Link href="/" className="absolute top-6 left-6 z-50">
-        <motion.div 
-          className="flex items-center gap-2"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <span className="text-2xl">🔍</span>
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-indigo-200">
-            DataVista
-          </h1>
-        </motion.div>
-      </Link>
+      <Link href="/" className="absolute top-4 left-4 z-50 sm:top-6 sm:left-6">
+  <motion.div 
+    className="flex items-center gap-1 sm:gap-2"
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <span className="text-xl sm:text-2xl">🔍</span>
+    <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-indigo-200 sm:text-2xl">
+      DataVista
+    </h1>
+  </motion.div>
+</Link>
 
       <div className="absolute inset-0 bg-[url('/galaxy.gif')] bg-cover bg-center opacity-20"></div>
       <StarField />
 
-      <div className="relative z-10 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md backdrop-blur-lg mb-8"
-           style={{
+<div className="relative z-10 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md backdrop-blur-lg mt-16 sm:mt-8 mb-8"           style={{
              background: 'radial-gradient(circle at center, rgba(30, 27, 46, 0.7) 0%, rgba(46, 16, 101, 0.7) 100%)',
              border: '1px solid rgba(139, 92, 246, 0.3)',
              boxShadow: '0 8px 32px 0 rgba(103, 58, 183, 0.37)'
@@ -237,14 +233,13 @@ export default function SignupPage() {
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-3 rounded-lg bg-gradient-to-r from-red-900/80 to-pink-900/80 text-red-100 text-sm"
+            className="mb-4 p-3 rounded-lg bg-gradient-to-r from-red-900/80 to-pink-900/80 text-red-100"
           >
             {error}
           </motion.div>
         )}
 
         <form onSubmit={handleSignup} className="space-y-4">
-          {/* Display Name */}
           <div className="flex items-center bg-gray-800/50 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
             <div className="pl-3 pr-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -256,11 +251,10 @@ export default function SignupPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Display Name"
-              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
+              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
             />
           </div>
 
-          {/* Email */}
           <div className="flex items-center bg-gray-800/50 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
             <div className="pl-3 pr-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,11 +267,10 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
-              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
+              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
             />
           </div>
 
-          {/* Password */}
           <div className="flex items-center bg-gray-800/50 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
             <div className="pl-3 pr-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -291,18 +284,18 @@ export default function SignupPage() {
               placeholder="Password"
               required
               minLength={6}
-              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
+              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
             />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="pr-3 text-gray-400 hover:text-purple-300 transition-colors duration-200"
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              className="px-3 text-gray-400 hover:text-purple-300 transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? "🙈" : "👁️"}
+              {showPassword ? '🙈' : '👁️'}
             </button>
           </div>
 
-          {/* Confirm Password */}
           <div className="flex items-center bg-gray-800/50 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition-all duration-200">
             <div className="pl-3 pr-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -316,14 +309,15 @@ export default function SignupPage() {
               placeholder="Confirm Password"
               required
               minLength={6}
-              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base"
+              className="w-full p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
             />
-            <button
-              type="button"
-              onClick={toggleConfirmPasswordVisibility}
-              className="pr-3 text-gray-400 hover:text-purple-300 transition-colors duration-200"
+            <button 
+              type="button" 
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="px-3 text-gray-400 hover:text-purple-300 transition-colors"
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             >
-              {showConfirmPassword ? "🙈" : "👁️"}
+              {showConfirmPassword ? '🙈' : '👁️'}
             </button>
           </div>
 
@@ -332,7 +326,7 @@ export default function SignupPage() {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full p-3 rounded-lg font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-full p-3 rounded-lg font-semibold shadow-md mb-4 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             style={{
               background: 'linear-gradient(45deg, rgba(124, 58, 237, 0.9) 0%, rgba(99, 102, 241, 0.9) 100%)',
               boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)'
@@ -352,7 +346,7 @@ export default function SignupPage() {
           </motion.button>
         </form>
 
-        <div className="flex items-center justify-center my-4">
+        <div className="flex items-center justify-center mb-4">
           <div className="flex-1 h-px bg-gray-700"></div>
           <span className="px-3 text-gray-400 text-sm">or</span>
           <div className="flex-1 h-px bg-gray-700"></div>
@@ -378,7 +372,7 @@ export default function SignupPage() {
           {loading ? "Signing in..." : "Continue with Google"}
         </motion.button>
 
-        <p className="text-gray-400 mt-4 text-center text-sm">
+        <p className="text-gray-400 mt-4 text-center text-sm sm:text-base">
           Already have an account?{' '}
           <Link href="/login" className="text-purple-300 hover:text-purple-200 hover:underline transition-colors duration-200">
             Login
@@ -386,7 +380,6 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {/* Footer */}
       <footer className="relative z-10 w-full py-4 text-center text-gray-400 text-sm">
         <motion.p
           initial={{ opacity: 0 }}
